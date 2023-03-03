@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Header, Form, Input, Button, Svg } from './Searchbar.styled';
+import toast from 'react-hot-toast';
 
 export class Searchbar extends Component {
   state = {
@@ -15,7 +16,7 @@ export class Searchbar extends Component {
     const { name } = e.currentTarget.elements;
     e.preventDefault()
     if(this.state.name.trim() === '') {
-        alert("Please enter word in search");
+        toast.error("Please enter word in search")
     }
     this.setState({
         name: name.value

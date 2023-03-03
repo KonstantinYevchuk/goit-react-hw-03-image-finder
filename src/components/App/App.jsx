@@ -4,26 +4,36 @@ import { makeFetch } from "components/Api/Api";
 import { Container } from "./App.styled";
 import { ImageGallery } from "components/ImageGallery/ImageGallery";
 import { Button } from "components/Button/Button";
+import { Loader } from "components/Loader/Loader";
+import toast, { Toaster } from 'react-hot-toast';
+
 
 
 export class App extends Component {
+  
   state = {
     query: '',
     items: [],
-    page: 1
+    page: 1,
+    loading: false,
+    error: ''
   }
   
-  loadMore = (e) => {
-    console.log(e.currentTarget);
+  loadMore = () => {
     this.setState(prevState => ({
       page: prevState.page + 1
     }))
+   
   }
     
   async componentDidUpdate(_, prevState) {
     if(prevState.query !== this.state.query) {
+      this.setState({loading: true})
       await makeFetch(this.state.query, this.state.page)
       .then(result => {
+        if(result.total === 0) {
+          toast.error("Not found")
+        }
         result.hits.map(item => {
           this.setState(prevState => (
             {
@@ -33,9 +43,15 @@ export class App extends Component {
             return item
         })
       })
-      .catch(error => console.log(error)) 
+      .catch(error => {
+        this.setState({
+          error
+        })
+      })
+      .finally(() => {this.setState({loading: false})}) 
       
     } else if(prevState.page !==this.state.page) {
+      this.setState({loading: true})
        await makeFetch(this.state.query, this.state.page)
       .then(result => {
         result.hits.map(item => {
@@ -48,6 +64,12 @@ export class App extends Component {
             return item
         })
       })
+      .catch(error => {
+        this.setState({
+          error
+        })
+      })
+      .finally(() => {this.setState({loading: false})})
       
     }
   }
@@ -60,26 +82,22 @@ export class App extends Component {
       items: [],
       page: 1
     })
-    // const result = await makeFetch(data)
-    // result.hits.map(item => {
-    //   this.setState(prevState => (
-    //     {
-    //       items: [...prevState.items, item],
-    //       query: data
-    //     }
-    //     ))
-    //     return item
-    // })
     
   }
-
+  
   render() {
     
     return (
       <Container>
         <Searchbar onSubmit={this.addSubmitForm}/>
         <ImageGallery items={this.state.items} />
-        { this.state.items.length > 0 && <Button click={this.loadMore} />}
+        {this.state.loading && <Loader />}
+        {this.state.items.length > 1 && <Button click={this.loadMore} />}
+        <div className="gallery"></div>
+        <Toaster 
+        position="top-center"
+        reverseOrder={false}
+        />
       </Container>
     );
   }

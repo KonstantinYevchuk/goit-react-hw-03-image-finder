@@ -5,6 +5,9 @@ const BASE_URL = 'https://pixabay.com/api/';
 export const makeFetch = async (name, page=1) => {
     try {
         const resp = await fetch(`${BASE_URL}?q=${name}&page=${page}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=12`)
+        if(!resp.ok) {
+            throw new Error(resp.statusText)
+        }
         const parsed = resp.json()
         return parsed
     } catch (error) {
