@@ -6,7 +6,7 @@ import { ImageGallery } from "components/ImageGallery/ImageGallery";
 import { Button } from "components/Button/Button";
 import { Loader } from "components/Loader/Loader";
 import toast, { Toaster } from 'react-hot-toast';
-
+import { animateScroll as scroll } from "react-scroll";
 
 
 export class App extends Component {
@@ -23,7 +23,9 @@ export class App extends Component {
     this.setState(prevState => ({
       page: prevState.page + 1
     }))
-   
+    
+      scroll.scrollToBottom(); 
+ 
   }
     
   async componentDidUpdate(_, prevState) {
@@ -86,14 +88,12 @@ export class App extends Component {
   }
   
   render() {
-    
     return (
       <Container>
         <Searchbar onSubmit={this.addSubmitForm}/>
         <ImageGallery items={this.state.items} />
         {this.state.loading && <Loader />}
         {this.state.items.length > 1 && <Button click={this.loadMore} />}
-        <div className="gallery"></div>
         <Toaster 
         position="top-center"
         reverseOrder={false}
