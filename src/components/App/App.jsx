@@ -8,6 +8,8 @@ import { Loader } from "components/Loader/Loader";
 import toast, { Toaster } from 'react-hot-toast';
 import { animateScroll as scroll } from "react-scroll";
 
+let totalHits;
+
 
 export class App extends Component {
   
@@ -16,7 +18,8 @@ export class App extends Component {
     items: [],
     page: 1,
     loading: false,
-    error: ''
+    error: '',
+    btn: false
   }
   
   loadMore = () => {
@@ -40,6 +43,7 @@ export class App extends Component {
           this.setState(prevState => (
             {
               items: [...prevState.items, item],
+              btn: true
             }
             ))
             return item
@@ -55,16 +59,20 @@ export class App extends Component {
     } else if(prevState.page !==this.state.page) {
       this.setState({loading: true})
        await makeFetch(this.state.query, this.state.page)
-      .then(result => {
+      .then(result => { 
+        totalHits = result.totalHits
+        const picsLast = totalHits - 12 * this.state.page;
         result.hits.map(item => {
-          this.setState(prevState => (
+          return this.setState(prevState => (
             {
               items: [...prevState.items, item],
               page: this.state.page
             }
             ))
-            return item
         })
+        picsLast > 0
+        ? this.setState({ btn: true })
+        : this.setState({ btn: false });
       })
       .catch(error => {
         this.setState({
@@ -88,12 +96,14 @@ export class App extends Component {
   }
   
   render() {
+    console.log(totalHits);
+    
     return (
       <Container>
         <Searchbar onSubmit={this.addSubmitForm}/>
         <ImageGallery items={this.state.items} />
         {this.state.loading && <Loader />}
-        {this.state.items.length > 1 && <Button click={this.loadMore} />}
+        {this.state.btn && <Button click={this.loadMore} />}
         <Toaster 
         position="top-center"
         reverseOrder={false}
